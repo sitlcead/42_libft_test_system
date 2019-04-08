@@ -1,0 +1,33 @@
+#!/bin/bash
+
+for file in ./$1/*
+do
+	for file in $file/*
+	do
+		if [ ! -d "$file/traces" ]
+		then
+			mkdir "$file/traces"
+		fi
+		echo "$file"
+		gcc -Wall -Wextra -Werror $file/sys_test_main.c sys_files/libft.a -I sys_files/ -o sys_run
+		gcc -Wall -Wextra -Werror $file/user_test_main.c ../libft.a -I ../ -o user_run
+		if [ ! -f "user_run" ]
+		then
+			exit
+		fi
+		if [ ! -f "sys_run" ]
+		then
+			exit
+		fi
+		./sys_run $file/traces/system_output
+		./user_run $file/traces/user_output
+		diff $file/traces/user_output $file/traces/system_output > $file/traces/diff.txt
+		rm user_run sys_run
+		if [ -s "$file/traces/diff.txt" ]
+			then
+				echo "$file/traces/diff.txt"
+				cat $file/traces/diff.txt
+				#exit
+		fi
+	done
+done
